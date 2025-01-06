@@ -9,7 +9,7 @@
   "dependencies": {
     "better-sqlite3": "^11.7.2",
     "dotenv": "^16.0.3",
-    "telegent": "file:../telegent",
+    "telegent": "^0.1.2",
     "ts-node": "^10.9.1"
   },
   "devDependencies": {
