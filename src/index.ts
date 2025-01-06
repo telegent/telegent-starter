@@ -1,39 +1,58 @@
-import { Telegent } from "telegent/dist/index";
+import { Telegent } from "telegent";
 import * as dotenv from "dotenv";
 import path from "path";
+import fs from "fs/promises";
 
-dotenv.config();
-
-const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
-const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
-
-if (!TELEGRAM_TOKEN || !CLAUDE_API_KEY) {
-  console.error("Missing required environment variables");
-  process.exit(1);
+interface Config {
+  TELEGRAM_TOKEN: string;
+  CLAUDE_API_KEY: string;
 }
 
-const bot = new Telegent({
-  telegram: {
-    token: TELEGRAM_TOKEN,
-  },
-  claude: {
-    apiKey: CLAUDE_API_KEY,
-  },
-  memory: {
-    path: path.join(__dirname, "../data/vectordb"),
-  },
-});
+function validateConfig(): Config {
+  dotenv.config();
+  const { TELEGRAM_TOKEN, CLAUDE_API_KEY } = process.env;
 
-// Handle graceful shutdown
-process.once("SIGINT", () => bot.stop());
-process.once("SIGTERM", () => bot.stop());
+  if (!TELEGRAM_TOKEN || !CLAUDE_API_KEY) {
+    throw new Error(
+      "Missing required environment variables: TELEGRAM_TOKEN or CLAUDE_API_KEY"
+    );
+  }
 
-bot
-  .start()
-  .then(() => {
+  return { TELEGRAM_TOKEN, CLAUDE_API_KEY };
+}
+
+async function ensureDirectoryExists(dir: string) {
+  try {
+    await fs.access(dir);
+  } catch {
+    await fs.mkdir(dir, { recursive: true });
+  }
+}
+
+async function main() {
+  try {
+    const config = validateConfig();
+    const dataDir = path.join(__dirname, "../data");
+    await ensureDirectoryExists(dataDir);
+
+    const bot = new Telegent({
+      telegram: { token: config.TELEGRAM_TOKEN },
+      claude: { apiKey: config.CLAUDE_API_KEY },
+      memory: { path: dataDir },
+    });
+
+    process.once("SIGINT", () => void bot.stop());
+    process.once("SIGTERM", () => void bot.stop());
+
+    await bot.start();
     console.log("Bot started successfully");
-  })
-  .catch((error: any) => {
-    console.error("Failed to start bot:", error);
+  } catch (error) {
+    console.error(
+      "Failed to start bot:",
+      error instanceof Error ? error.message : error
+    );
     process.exit(1);
-  });
+  }
+}
+
+main();
