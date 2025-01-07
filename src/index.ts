@@ -1,4 +1,4 @@
-import { Telegent } from "telegent";
+import { Telegent, LoggerPlugin, SolanaPlugin } from "telegent";
 import * as dotenv from "dotenv";
 import path from "path";
 import fs from "fs/promises";
@@ -43,6 +43,9 @@ async function main() {
 
     process.once("SIGINT", () => void bot.stop());
     process.once("SIGTERM", () => void bot.stop());
+
+    await bot.registerPlugin(new LoggerPlugin());
+    await bot.registerPlugin(new SolanaPlugin({ dataPath: dataDir }));
 
     await bot.start();
     console.log("Bot started successfully");
