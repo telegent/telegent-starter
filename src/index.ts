@@ -1,4 +1,9 @@
-import { Telegent, LoggerPlugin, SolanaPlugin } from "telegent";
+import {
+  Telegent,
+  LoggerPlugin,
+  SolanaPlugin,
+  ImageGenerationPlugin,
+} from "telegent";
 import * as dotenv from "dotenv";
 import path from "path";
 import fs from "fs/promises";
@@ -35,17 +40,21 @@ async function main() {
     const dataDir = path.join(__dirname, "../data");
     await ensureDirectoryExists(dataDir);
 
-    const bot = new Telegent({
+    let bot_config = {
       telegram: { token: config.TELEGRAM_TOKEN },
       claude: { apiKey: config.CLAUDE_API_KEY },
       memory: { path: dataDir },
-    });
+      openai: { apiKey: process.env.OPENAI_API_KEY },
+    };
+
+    const bot = new Telegent(bot_config);
 
     process.once("SIGINT", () => void bot.stop());
     process.once("SIGTERM", () => void bot.stop());
 
     await bot.registerPlugin(new LoggerPlugin());
     await bot.registerPlugin(new SolanaPlugin({ dataPath: dataDir }));
+    await bot.registerPlugin(new ImageGenerationPlugin(bot_config));
 
     await bot.start();
     console.log("Bot started successfully");
