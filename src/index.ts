@@ -40,11 +40,25 @@ async function main() {
     const dataDir = path.join(__dirname, "../data");
     await ensureDirectoryExists(dataDir);
 
-    let bot_config = {
+    const bot_config = {
       telegram: { token: config.TELEGRAM_TOKEN },
       claude: { apiKey: config.CLAUDE_API_KEY },
       memory: { path: dataDir },
       openai: { apiKey: process.env.OPENAI_API_KEY },
+      character: {
+        name: "Telegent",
+        role: "AI Helper",
+        basePersonality: "I am friendly, patient, and encouraging.",
+        traits: [
+          {
+            name: "Helpful",
+            description: "I love explaining complex topics in simple terms",
+          },
+        ],
+        language: "English",
+        customPrompt:
+          "I specialize in helping users learn about AI agents through conversation.",
+      },
     };
 
     const bot = new Telegent(bot_config);
