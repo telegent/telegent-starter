@@ -3,6 +3,7 @@ import {
   LoggerPlugin,
   SolanaPlugin,
   ImageGenerationPlugin,
+  CodexPlugin,
 } from "telegent";
 import * as dotenv from "dotenv";
 import path from "path";
@@ -45,6 +46,7 @@ async function main() {
       claude: { apiKey: config.CLAUDE_API_KEY },
       memory: { path: dataDir },
       openai: { apiKey: process.env.OPENAI_API_KEY },
+      codex: { apiKey: process.env.CODEX_API_KEY },
     };
 
     const bot = new Telegent(bot_config);
@@ -55,7 +57,7 @@ async function main() {
     await bot.registerPlugin(new LoggerPlugin());
     await bot.registerPlugin(new SolanaPlugin({ dataPath: dataDir }));
     await bot.registerPlugin(new ImageGenerationPlugin(bot_config));
-
+    await bot.registerPlugin(new CodexPlugin(bot_config));
     await bot.start();
     console.log("Bot started successfully");
   } catch (error) {
