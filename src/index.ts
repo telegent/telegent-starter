@@ -43,7 +43,11 @@ async function main() {
 
     let bot_config = {
       telegram: { token: config.TELEGRAM_TOKEN },
-      claude: { apiKey: config.CLAUDE_API_KEY },
+      ai: {
+        provider: "claude" as const,
+        claudeApiKey: process.env.CLAUDE_API_KEY,
+        deepseekApiKey: "your-deepseek-api-key",
+      },
       memory: { path: dataDir },
       openai: { apiKey: process.env.OPENAI_API_KEY },
       codex: { apiKey: process.env.CODEX_API_KEY },
